@@ -393,8 +393,6 @@
                             <div style="font-size: 11px; color: var(--text-muted);">Administrator</div>
                         </div>
                     </div>
-
-                    
                 </div>
             </div>
 
@@ -463,7 +461,6 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
         // --- DISCORD OAUTH (IMPLICIT GRANT - FRONTEND ONLY) ---
-               // --- DISCORD OAUTH ---
         const CLIENT_ID = "1568790262409338941"; 
         const REDIRECT_URI = window.location.origin + window.location.pathname;
 
@@ -472,7 +469,7 @@
             window.location.href = oauthUrl;
         }
 
-                // 1. N7ETO L'VERIFICATION DYAL DISCORD F L'AWAL
+        // 1. N7ETO L'VERIFICATION DYAL DISCORD F L'AWAL
         window.addEventListener('DOMContentLoaded', () => {
             const fragment = new URLSearchParams(window.location.hash.slice(1));
             const accessToken = fragment.get('access_token');
@@ -495,17 +492,11 @@
             }
         });
 
-        
-
         // --- L'BA9I DYAL L'CODE (API_URL, loadUsers, createUser, etc.) ---
         const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
         let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
         let DISCORD_USER = localStorage.getItem('discord_user');
         let userToDeleteId = null;
-
-        if (!ADMIN_PASSWORD && !DISCORD_USER) {
-            window.location.href = 'login.html';
-        }
 
         particlesJS("particles-js", {
             "particles": {
@@ -672,7 +663,6 @@
         // Updati l'badge dyal l'Admin ila kan b l'password
         if (ADMIN_PASSWORD && !DISCORD_USER) {
             document.getElementById('adminProfile').style.display = 'flex';
-            document.getElementById('discordProfile').style.display = 'none';
         }
     </script>
 </body>
