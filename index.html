@@ -105,6 +105,12 @@
         .app-selector .app-dropdown div:hover {
             background: var(--bg-hover);
         }
+        .app-selector .app-dropdown .add-app-btn {
+            color: var(--green);
+            font-weight: 600;
+            text-align: center;
+            background: rgba(34, 197, 94, 0.1);
+        }
 
         .nav-item {
             display: flex;
@@ -431,9 +437,14 @@
             <div class="dashboard">
                 <div class="header-actions">
                     <h2>Users <span id="appHeaderName" style="font-size: 14px; color: var(--text-muted);"></span></h2>
-                    <button class="btn btn-primary" onclick="openModal()">
-                        <i class="fa-solid fa-plus"></i> Create User
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="openCreateAppModal()" style="background: #5865F2;">
+                            <i class="fa-solid fa-plus"></i> Create Application
+                        </button>
+                        <button class="btn btn-primary" onclick="openModal()">
+                            <i class="fa-solid fa-plus"></i> Create User
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="filters">
@@ -447,6 +458,7 @@
         </div>
     </div>
 
+    <!-- MODAL DYAL CREATE USER -->
     <div class="modal-overlay" id="createUserModal">
         <div class="modal">
             <h3>Create user</h3>
@@ -478,6 +490,25 @@
         </div>
     </div>
 
+    <!-- MODAL DYAL CREATE APPLICATION -->
+    <div class="modal-overlay" id="createAppModal">
+        <div class="modal">
+            <h3>Create Application</h3>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">Enter the application name. The system will generate OwnerID, Secret, and Version.</p>
+            
+            <div class="form-group">
+                <label>Application Name <span style="color:red">*</span></label>
+                <input type="text" id="newAppName" placeholder="e.g. 4FLAG Application">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeCreateAppModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createApp(event)">Create App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DYAL DELETE -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal">
             <i class="fa-solid fa-triangle-exclamation icon"></i>
@@ -534,7 +565,7 @@
         async function loadApps() {
             try {
                 const res = await fetch(`${API_URL}/api/admin/apps`, {
-                    headers: { 'x-admin-password': ADMIN_PASSWORD || "admin123" }
+                    headers: { 'x-admin-password': ADMIN_PASSWORD || "APOSTADO99" }
                 });
                 const apps = await res.json();
                 
@@ -542,7 +573,8 @@
                 dropdown.innerHTML = "";
                 
                 if (apps.length === 0) {
-                    dropdown.innerHTML = `<div style="color: var(--text-muted);">No apps</div>`;
+                    dropdown.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 15px;">No apps found</div>`;
+                    document.getElementById('currentAppName').innerText = "No Apps";
                     return;
                 }
 
@@ -550,7 +582,6 @@
                     dropdown.innerHTML += `<div onclick="selectApp(${app.id}, '${app.name}')">${app.name}</div>`;
                 });
 
-                // Ila ma kaynch app mkhtar, khtar l'lowla
                 if (!currentAppId) {
                     selectApp(apps[0].id, apps[0].name);
                 }
@@ -578,15 +609,53 @@
             document.getElementById('createUserModal').style.display = 'none';
         }
 
-        function showToast(username, password) {
+        function openCreateAppModal() {
+            document.getElementById('createAppModal').style.display = 'flex';
+        }
+
+        function closeCreateAppModal() {
+            document.getElementById('createAppModal').style.display = 'none';
+        }
+
+        function showToast(title, msg) {
             const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerHTML = `User: <b>${username}</b> | Pass: <b>${password}</b>`;
+            document.querySelector('#toast .title').innerText = title;
+            document.getElementById('toastMsg').innerHTML = msg;
             toast.classList.add('show');
             setTimeout(() => { toast.classList.remove('show'); }, 5000);
         }
 
         function closeToast() {
             document.getElementById('toast').classList.remove('show');
+        }
+
+        async function createApp(e) {
+            if(e) e.preventDefault();
+            const name = document.getElementById('newAppName').value;
+
+            if (!name) return alert("App name is required!");
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/apps`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-admin-password': ADMIN_PASSWORD || "APOSTADO99"
+                    },
+                    body: JSON.stringify({ name })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast("App Created Successfully!", `OwnerID: <b>${data.ownerid}</b><br>Secret: <b>${data.secret}</b><br>Version: <b>${data.version}</b>`);
+                    closeCreateAppModal();
+                    loadApps();
+                } else {
+                    alert("Server Error: " + JSON.stringify(data));
+                }
+            } catch (e) {
+                alert("Server error: " + e.message);
+            }
         }
 
         async function createUser(e) {
@@ -606,14 +675,14 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-admin-password': ADMIN_PASSWORD || "admin123"
+                        'x-admin-password': ADMIN_PASSWORD || "APOSTADO99"
                     },
                     body: JSON.stringify({ app_id: currentAppId, username, password, expiry, hwid: hwidLock ? "1" : "0" })
                 });
                 
                 const data = await res.json();
                 if (data.success) {
-                    showToast(username, password);
+                    showToast("User Created!", `User: <b>${username}</b> | Pass: <b>${password}</b>`);
                     closeModal();
                     loadUsers();
                 } else {
@@ -642,7 +711,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-admin-password': ADMIN_PASSWORD || "admin123"
+                        'x-admin-password': ADMIN_PASSWORD || "APOSTADO99"
                     },
                     body: JSON.stringify({ id: userToDeleteId })
                 });
@@ -663,7 +732,7 @@
             if (!currentAppId) return;
             try {
                 const res = await fetch(`${API_URL}/api/admin/users/${currentAppId}`, {
-                    headers: { 'x-admin-password': ADMIN_PASSWORD || "admin123" }
+                    headers: { 'x-admin-password': ADMIN_PASSWORD || "APOSTADO99" }
                 });
                 const users = await res.json();
                 
