@@ -19,6 +19,7 @@
             --red: #ef4444;
             --green: #22c55e;
             --discord: #5865F2;
+            --blue: #3b82f6;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -105,8 +106,6 @@
         .app-selector .app-dropdown div:hover {
             background: var(--bg-hover);
         }
-
-        /* L'BOUTON DYAL CREATE NEW APP F L'DROPDOWN */
         .app-selector .app-dropdown .add-app-btn {
             color: var(--green);
             font-weight: 600;
@@ -209,7 +208,75 @@
         }
         .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: var(--accent-hover); }
+
+        /* TABS STYLE */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .tab-btn:hover { color: var(--text-main); }
+        .tab-btn.active {
+            color: var(--text-main);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         
+        /* APP INFO CARD */
+        .app-info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+        }
+        .app-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .app-info-item label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .app-info-item span {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px;
+            transition: 0.2s;
+        }
+        .copy-btn:hover { color: var(--accent); }
+
+        /* USERS GRID */
         .users-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -338,10 +405,6 @@
         .btn-cancel { background: var(--bg-hover); color: white; }
         .btn-cancel:hover { background: #3f3f46; }
 
-        #deleteModal .modal { width: 350px; text-align: center; }
-        #deleteModal .modal-actions { justify-content: center; }
-        #deleteModal .icon { font-size: 40px; color: var(--red); margin-bottom: 10px; }
-
         #toast {
             position: fixed;
             top: 20px;
@@ -391,12 +454,11 @@
                 <i class="fa-solid fa-shield-halved"></i> ASXXHRAAF 
             </div>
             
-            <!-- HNA L'APP SELECTOR -->
             <div class="app-selector" onclick="toggleAppDropdown()">
                 <span id="currentAppName">Loading...</span>
                 <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
                 <div class="app-dropdown" id="appDropdown">
-                    <!-- L'apps ghadi ybanou hna + bouton dyal Create New App -->
+                    <!-- L'apps ghadi ybanou hna -->
                 </div>
             </div>
             
@@ -424,22 +486,76 @@
                 </div>
             </div>
 
-            <div class="dashboard">
-                <div class="header-actions">
-                    <h2>Users <span id="appHeaderName" style="font-size: 14px; color: var(--text-muted);"></span></h2>
+            <!-- L'PAGE LI KAYBAN FIHA L'APP MKHTARA -->
+            <div class="dashboard" id="appDashboardContent" style="display: none;">
+                
+                <!-- L'HEADER DYAL L'APP -->
+                <div class="header-actions" style="margin-bottom: 20px;">
+                    <h2 id="selectedAppHeaderName">App Name</h2>
                     <button class="btn btn-primary" onclick="openModal()">
                         <i class="fa-solid fa-plus"></i> Create User
                     </button>
                 </div>
-                
-                <div class="filters">
-                    <button class="filter-btn active"><i class="fa-solid fa-filter"></i></button>
-                    <button class="filter-btn"><i class="fa-solid fa-border-all"></i></button>
-                    <button class="filter-btn"><i class="fa-solid fa-user-plus"></i></button>
+
+                <!-- TABS -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('info')" id="tab-btn-info">Application Info</button>
+                    <button class="tab-btn" onclick="switchTab('users')" id="tab-btn-users">Users</button>
                 </div>
 
-                <div class="users-grid" id="usersGrid"></div>
+                <!-- TAB CONTENT: APPLICATION INFO -->
+                <div class="tab-content active" id="tab-content-info">
+                    <div class="app-info-card">
+                        <div class="app-info-item">
+                            <label>Application Name</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="infoName">-</span>
+                                <button class="copy-btn" onclick="copyToClipboard('infoName')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div class="app-info-item">
+                            <label>Owner ID</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="infoOwnerId">-</span>
+                                <button class="copy-btn" onclick="copyToClipboard('infoOwnerId')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div class="app-info-item">
+                            <label>Application Secret</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="infoSecret">-</span>
+                                <button class="copy-btn" onclick="copyToClipboard('infoSecret')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div class="app-info-item">
+                            <label>Version</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span id="infoVersion">-</span>
+                                <button class="copy-btn" onclick="copyToClipboard('infoVersion')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT: USERS -->
+                <div class="tab-content" id="tab-content-users">
+                    <div class="users-grid" id="usersGrid"></div>
+                </div>
+
             </div>
+
+            <!-- L'PAGE LI KAYBAN F L'LOWLA (bla app) -->
+            <div class="dashboard" id="noAppContent">
+                <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">
+                    <i class="fa-solid fa-layer-group" style="font-size: 50px; margin-bottom: 20px;"></i>
+                    <h2>No Application Selected</h2>
+                    <p>Create or select an application from the sidebar to view its details.</p>
+                    <button class="btn btn-primary" onclick="openCreateAppModal()" style="margin: 20px auto; background: var(--blue);">
+                        <i class="fa-solid fa-plus"></i> Create Application
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -447,27 +563,22 @@
     <div class="modal-overlay" id="createUserModal">
         <div class="modal">
             <h3>Create user</h3>
-            
             <div class="form-group">
                 <label>Username <span style="color:red">*</span></label>
                 <input type="text" id="newUsername" placeholder="e.g. 4FLAG">
             </div>
-            
             <div class="form-group">
                 <label>Password <i class="fa-regular fa-circle-question"></i></label>
                 <input type="text" id="newPassword" placeholder="Enter password for panel">
             </div>
-
             <div class="form-group">
                 <label>Expiration <span style="color:red">*</span></label>
                 <input type="date" id="newExpiry">
             </div>
-
             <div class="checkbox-group">
                 <input type="checkbox" id="hwidLock" checked>
                 <label for="hwidLock">HWID Affected <i class="fa-regular fa-circle-question"></i></label>
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="createUser(event)">Create</button>
@@ -480,12 +591,10 @@
         <div class="modal">
             <h3>Create Application</h3>
             <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">Enter the application name. The system will generate OwnerID, Secret, and Version.</p>
-            
             <div class="form-group">
                 <label>Application Name <span style="color:red">*</span></label>
                 <input type="text" id="newAppName" placeholder="e.g. 4FLAG Application">
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="closeCreateAppModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="createApp(event)">Create App</button>
@@ -560,13 +669,15 @@
                 if (apps.length === 0) {
                     dropdown.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 15px;">No apps found</div>`;
                     document.getElementById('currentAppName').innerText = "No Apps";
+                    document.getElementById('appDashboardContent').style.display = 'none';
+                    document.getElementById('noAppContent').style.display = 'block';
                 } else {
                     apps.forEach(app => {
-                        dropdown.innerHTML += `<div onclick="selectApp(${app.id}, '${app.name}')">${app.name}</div>`;
+                        dropdown.innerHTML += `<div onclick="selectApp(${app.id}, '${app.name}', '${app.ownerid}', '${app.secret}', '${app.version}')">${app.name}</div>`;
                     });
+                    document.getElementById('noAppContent').style.display = 'none';
                 }
 
-                // HNA KAN-ZIDO BOUTON DYAL CREATE NEW APP
                 dropdown.innerHTML += `
                     <div class="add-app-btn" onclick="event.stopPropagation(); openCreateAppModal();">
                         <i class="fa-solid fa-plus"></i> Create New App
@@ -574,19 +685,45 @@
                 `;
 
                 if (!currentAppId && apps.length > 0) {
-                    selectApp(apps[0].id, apps[0].name);
+                    selectApp(apps[0].id, apps[0].name, apps[0].ownerid, apps[0].secret, apps[0].version);
                 }
             } catch (e) {
                 console.error("Failed to load apps.");
             }
         }
 
-        function selectApp(id, name) {
+        function selectApp(id, name, ownerid, secret, version) {
             currentAppId = id;
             document.getElementById('currentAppName').innerText = name;
-            document.getElementById('appHeaderName').innerText = `(${name})`;
+            document.getElementById('selectedAppHeaderName').innerText = name;
             document.getElementById('appDropdown').classList.remove('show');
+            
+            // Update Info Tab
+            document.getElementById('infoName').innerText = name;
+            document.getElementById('infoOwnerId').innerText = ownerid || 'N/A';
+            document.getElementById('infoSecret').innerText = secret || 'N/A';
+            document.getElementById('infoVersion').innerText = version || '1.0';
+
+            document.getElementById('appDashboardContent').style.display = 'block';
+            document.getElementById('noAppContent').style.display = 'none';
+            
+            // Reset to info tab
+            switchTab('info');
             loadUsers();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+            document.getElementById(`tab-content-${tabName}`).classList.add('active');
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text);
+            showToast("Copied!", `Text copied to clipboard: <b>${text}</b>`);
         }
 
         function openModal() {
