@@ -120,7 +120,7 @@
             "retina_detect": true
         });
 
-                       const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
+                const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
 
         function login() {
             const pass = document.getElementById('adminLoginPass').value;
@@ -130,9 +130,9 @@
                 headers: { 'x-admin-password': pass }
             }).then(res => {
                 if (res.ok) {
-                    // HNA KAYT-SJJEL L'PASSWORD
-                    localStorage.setItem('adminPassword', pass);
-                   window.location.href = 'auth.html';
+                    // Kan-sjjlo f sessionStorage (kaytmse7 mli tsed browser)
+                    sessionStorage.setItem('adminPassword', pass);
+                    window.location.href = 'auth.html';
                 } else {
                     alert("Wrong Admin Password!");
                 }
