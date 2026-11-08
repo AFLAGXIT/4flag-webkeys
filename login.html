@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASXXHRAAF SENSI | Login</title>
+    <title>ASXXHRAAF | Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -94,7 +94,7 @@
     <div id="particles-js"></div>
 
     <div class="login-box">
-        <h1><i class="fa-solid fa-shield-halved"></i> ASXXHRAAF SENSI</h1>
+        <h1><i class="fa-solid fa-shield-halved"></i> ASXXHRAAF</h1>
         <p>Please enter admin password to continue</p>
         <input type="password" id="adminLoginPass" class="login-input" placeholder="Enter Admin Password">
         <button class="login-btn" onclick="login()">Login</button>
@@ -132,7 +132,7 @@
                 if (res.ok) {
                     // HNA KAYT-SJJEL L'PASSWORD
                     localStorage.setItem('adminPassword', pass);
-                    window.location.href = 'index.html';
+                   window.location.href = 'auth.html';
                 } else {
                     alert("Wrong Admin Password!");
                 }

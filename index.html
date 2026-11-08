@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASXXHRAAF SENSI | Dashboard</title>
+    <title>ASXXHRAAF | Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -385,10 +385,10 @@
             <div class="topbar">
                 <input type="text" class="search-bar" placeholder="Search pages...">
                 <div class="user-profile">
-                    <div class="avatar">4</div>
+                    <div class="avatar" id="userAvatar">4</div>
                     <div>
-                        <div style="font-size: 13px; font-weight: 600;">Admin</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">Administrator</div>
+                        <div style="font-size: 13px; font-weight: 600;" id="userName">Admin</div>
+                        <div style="font-size: 11px; color: var(--text-muted);" id="userRole">Administrator</div>
                     </div>
                 </div>
             </div>
@@ -458,15 +458,22 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
         // --- L'7IMAYA L'MSALA ---
-        // 1. Kan-choufo wach kayn l'password f localStorage
-        let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
+        const urlParams = new URLSearchParams(window.location.search);
+        const discordData = urlParams.get('discord');
+        
+        if (discordData) {
+            const user = JSON.parse(decodeURIComponent(discordData));
+            localStorage.setItem('discord_user', JSON.stringify(user));
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
-        // 2. Ila ma kaynch, kan-redirectiw DIRECT l login.html (9bel ma yt7el ay 7aja)
-        if (!ADMIN_PASSWORD) {
+        let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
+        let DISCORD_USER = localStorage.getItem('discord_user');
+
+        if (!ADMIN_PASSWORD && !DISCORD_USER) {
             window.location.href = 'login.html';
         }
 
-        // 3. Ila kan, kan-kemlo l'khedma 3adi
         const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
         let userToDeleteId = null;
 
@@ -490,6 +497,7 @@
 
         function logout() {
             localStorage.removeItem('adminPassword');
+            localStorage.removeItem('discord_user');
             window.location.href = 'login.html';
         }
 
@@ -531,7 +539,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-admin-password': ADMIN_PASSWORD 
+                        'x-admin-password': ADMIN_PASSWORD || "admin123" // Ila kan Discord, kayakhod l'password default
                     },
                     body: JSON.stringify({ username, password: password, expiry, hwid: hwidLock ? "1" : "0" })
                 });
@@ -567,7 +575,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-admin-password': ADMIN_PASSWORD 
+                        'x-admin-password': ADMIN_PASSWORD || "admin123"
                     },
                     body: JSON.stringify({ id: userToDeleteId })
                 });
@@ -587,7 +595,7 @@
         async function loadUsers() {
             try {
                 const res = await fetch(`${API_URL}/api/admin/users`, {
-                    headers: { 'x-admin-password': ADMIN_PASSWORD }
+                    headers: { 'x-admin-password': ADMIN_PASSWORD || "admin123" }
                 });
                 const users = await res.json();
                 
@@ -633,8 +641,19 @@
             }
         }
 
-        if (ADMIN_PASSWORD) {
+        if (ADMIN_PASSWORD || DISCORD_USER) {
             loadUsers();
+        }
+
+        // Updati l'badge ila kan Discord
+        if (DISCORD_USER) {
+            const user = JSON.parse(DISCORD_USER);
+            document.getElementById('userName').innerText = user.username;
+            document.getElementById('userRole').innerText = "Online";
+            document.getElementById('userRole').style.color = "#22c55e"; // Khder
+            if(user.avatar) {
+                document.getElementById('userAvatar').innerHTML = `<img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" style="width:100%; border-radius:50%;">`;
+            }
         }
     </script>
 </body>
