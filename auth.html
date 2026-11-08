@@ -24,10 +24,20 @@
         <div class="icon-discord"><i class="fa-brands fa-discord"></i></div>
         <h1>AUTHENTICATION REQUIRED</h1>
         <p>You must authorize with your Discord account to access the 4FLAG CHEATS dashboard & store.</p>
-        <button class="discord-btn" onclick="window.location.href='https://4flagkeys-production-8b1a.up.railway.app/api/auth/discord'">
+        <button class="discord-btn" onclick="loginWithDiscord()">
             <i class="fa-brands fa-discord"></i> Connect with Discord
         </button>
         <p class="footer-text">Protected by 4FLAG Security System</p>
     </div>
+
+    <script>
+        function loginWithDiscord() {
+            const CLIENT_ID = "1568790262409338941"; // CLIENT_ID DYALEK
+            const REDIRECT_URI = window.location.origin + "/index.html"; // KAY-RJE3 L INDEX.HTML
+            const OAUTH2_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+            
+            window.location.href = OAUTH2_URL;
+        }
+    </script>
 </body>
 </html>

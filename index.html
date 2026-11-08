@@ -384,11 +384,28 @@
         <div class="main-content">
             <div class="topbar">
                 <input type="text" class="search-bar" placeholder="Search pages...">
-                <div class="user-profile">
-                    <div class="avatar" id="userAvatar">4</div>
-                    <div>
-                        <div style="font-size: 13px; font-weight: 600;" id="userName">Admin</div>
-                        <div style="font-size: 11px; color: var(--text-muted);" id="userRole">Administrator</div>
+                <div class="user-profile" id="profileCard">
+                    <!-- L'card dyal Admin (kayban ila kan b l'password) -->
+                    <div class="user-profile" id="adminProfile" style="display: none;">
+                        <div class="avatar">4</div>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600;">Admin</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Administrator</div>
+                        </div>
+                    </div>
+
+                    <!-- L'card dyal Discord (kayban ila kan b Discord) -->
+                    <div class="user-profile" id="discordProfile" style="display: none; gap: 10px; padding: 5px 15px; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border);">
+                        <img id="discordAvatar" src="" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--discord);">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600;" id="discordName">Discord User</div>
+                            <div style="font-size: 11px; color: #22c55e; display: flex; align-items: center; gap: 5px;">
+                                <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span> Online
+                            </div>
+                        </div>
+                        <button onclick="logout()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; margin-left: 5px;">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -457,25 +474,87 @@
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // --- L'7IMAYA L'MSALA ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const discordData = urlParams.get('discord');
-        
-        if (discordData) {
-            const user = JSON.parse(decodeURIComponent(discordData));
-            localStorage.setItem('discord_user', JSON.stringify(user));
-            window.history.replaceState({}, document.title, window.location.pathname);
+        // --- DISCORD OAUTH (IMPLICIT GRANT - FRONTEND ONLY) ---
+        const CLIENT_ID = "1568790262409338941"; 
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+        function loginWithDiscord() {
+            const oauthUrl = `https://discord.com/oauth2/authorize?client_id=1568790262409338941&response_type=code&redirect_uri=https%3A%2F%2F4flag-webkeys.vercel.app%2Findex.html&scope=identify`;
+            window.location.href = oauthUrl;
         }
 
+        window.addEventListener('DOMContentLoaded', () => {
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            const accessToken = fragment.get('access_token');
+
+            if (accessToken) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                fetchDiscordUserData(accessToken);
+            } else {
+                const savedUser = localStorage.getItem('discord_user');
+                if (savedUser) {
+                    unlockSite(JSON.parse(savedUser));
+                } else {
+                    if (!localStorage.getItem('adminPassword')) {
+                        window.location.href = 'login.html';
+                    }
+                }
+            }
+        });
+
+        function fetchDiscordUserData(token) {
+            fetch('https://discord.com/api/users/@me', {
+                headers: { authorization: `Bearer ${token}` },
+            })
+            .then(res => res.json())
+            .then(user => {
+                if (user.id) {
+                    const avatarUrl = user.avatar 
+                        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` 
+                        : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+                    const userData = {
+                        username: user.global_name || user.username,
+                        avatar: avatarUrl,
+                        id: user.id
+                    };
+
+                    localStorage.setItem('discord_user', JSON.stringify(userData));
+                    unlockSite(userData);
+                }
+            })
+            .catch(err => console.error("Discord Auth Error:", err));
+        }
+
+        function unlockSite(user) {
+            const adminProfile = document.getElementById('adminProfile');
+            const discordProfile = document.getElementById('discordProfile');
+            
+            if (adminProfile) adminProfile.style.display = 'none';
+            if (discordProfile) discordProfile.style.display = 'flex';
+            
+            const discordName = document.getElementById('discordName');
+            const discordAvatar = document.getElementById('discordAvatar');
+            
+            if (discordName) discordName.innerText = user.username;
+            if (discordAvatar) discordAvatar.src = user.avatar;
+        }
+
+        function logout() {
+            localStorage.removeItem('adminPassword');
+            localStorage.removeItem('discord_user');
+            window.location.href = 'login.html';
+        }
+
+        // --- L'BA9I DYAL L'CODE (API_URL, loadUsers, createUser, etc.) ---
+        const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
         let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
         let DISCORD_USER = localStorage.getItem('discord_user');
+        let userToDeleteId = null;
 
         if (!ADMIN_PASSWORD && !DISCORD_USER) {
             window.location.href = 'login.html';
         }
-
-        const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
-        let userToDeleteId = null;
 
         particlesJS("particles-js", {
             "particles": {
@@ -494,12 +573,6 @@
             },
             "retina_detect": true
         });
-
-        function logout() {
-            localStorage.removeItem('adminPassword');
-            localStorage.removeItem('discord_user');
-            window.location.href = 'login.html';
-        }
 
         function openModal() {
             document.getElementById('createUserModal').style.display = 'flex';
@@ -539,7 +612,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-admin-password': ADMIN_PASSWORD || "admin123" // Ila kan Discord, kayakhod l'password default
+                        'x-admin-password': ADMIN_PASSWORD || "admin123"
                     },
                     body: JSON.stringify({ username, password: password, expiry, hwid: hwidLock ? "1" : "0" })
                 });
@@ -645,15 +718,10 @@
             loadUsers();
         }
 
-        // Updati l'badge ila kan Discord
-        if (DISCORD_USER) {
-            const user = JSON.parse(DISCORD_USER);
-            document.getElementById('userName').innerText = user.username;
-            document.getElementById('userRole').innerText = "Online";
-            document.getElementById('userRole').style.color = "#22c55e"; // Khder
-            if(user.avatar) {
-                document.getElementById('userAvatar').innerHTML = `<img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" style="width:100%; border-radius:50%;">`;
-            }
+        // Updati l'badge dyal l'Admin ila kan b l'password
+        if (ADMIN_PASSWORD && !DISCORD_USER) {
+            document.getElementById('adminProfile').style.display = 'flex';
+            document.getElementById('discordProfile').style.display = 'none';
         }
     </script>
 </body>
