@@ -475,12 +475,10 @@
             "retina_detect": true
         });
 
-                const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
-        
-        // HNA L'7IMAYA: Ila ma kaynch l'password, kat-redirectih l login
-        if (!localStorage.getItem('adminPassword')) {
-            window.location.href = 'login.html';
-        }
+        // 7YEDT L' / MN L'AKHIR HNA 7TA HOWA
+         = "https://4flagkeys-production-8b1a.up.railway.app";
+        let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
+        let userToDeleteId = null;const API_URL
 
         if (!ADMIN_PASSWORD) {
             window.location.href = 'login.html';
