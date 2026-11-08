@@ -434,7 +434,6 @@
                 </div>
             </div>
             
-            <!-- TABS F L'SIDEBAR -->
             <a class="nav-item active" onclick="showPage('info')" id="nav-info"><i class="fa-solid fa-circle-info"></i> Application Info</a>
             <a class="nav-item" onclick="showPage('users')" id="nav-users"><i class="fa-solid fa-users"></i> Users</a>
             
@@ -464,6 +463,9 @@
             <div class="dashboard" id="pageInfo" style="display: block;">
                 <div class="header-actions">
                     <h2 id="infoHeaderName">Application Info</h2>
+                    <button class="btn btn-primary" onclick="openDeleteAppModal()" style="background: var(--red);">
+                        <i class="fa-solid fa-trash"></i> Delete App
+                    </button>
                 </div>
                 <div class="app-info-card">
                     <div class="app-info-item">
@@ -554,15 +556,28 @@
         </div>
     </div>
 
-    <!-- MODAL DYAL DELETE -->
+    <!-- MODAL DYAL DELETE USER -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal">
-            <i class="fa-solid fa-triangle-exclamation icon"></i>
+            <i class="fa-solid fa-triangle-exclamation icon" style="font-size: 40px; color: var(--red); margin-bottom: 10px;"></i>
             <h3>Are you sure?</h3>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px;">Do you really want to delete this user? This process cannot be undone.</p>
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="closeDeleteModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="confirmDelete()" style="background: var(--red);">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DYAL DELETE APP -->
+    <div class="modal-overlay" id="deleteAppModal">
+        <div class="modal">
+            <i class="fa-solid fa-triangle-exclamation icon" style="font-size: 40px; color: var(--red); margin-bottom: 10px;"></i>
+            <h3>Delete Application?</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px;">Are you sure you want to delete this application? This will also delete all users inside it. This process cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeDeleteAppModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmDeleteApp()" style="background: var(--red);">Delete App</button>
             </div>
         </div>
     </div>
@@ -697,6 +712,15 @@
             document.getElementById('createAppModal').style.display = 'none';
         }
 
+        function openDeleteAppModal() {
+            if (!currentAppId) return;
+            document.getElementById('deleteAppModal').style.display = 'flex';
+        }
+
+        function closeDeleteAppModal() {
+            document.getElementById('deleteAppModal').style.display = 'none';
+        }
+
         function showToast(title, msg) {
             const toast = document.getElementById('toast');
             document.querySelector('#toast .title').innerText = title;
@@ -732,6 +756,29 @@
                     loadApps();
                 } else {
                     alert("Server Error: " + JSON.stringify(data));
+                }
+            } catch (e) {
+                alert("Server error: " + e.message);
+            }
+        }
+
+        async function confirmDeleteApp() {
+            if (!currentAppId) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/apps/${currentAppId}`, {
+                    method: 'DELETE',
+                    headers: { 'x-admin-password': ADMIN_PASSWORD || "APOSTADO99" }
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast("App Deleted!", `Application has been deleted.`);
+                    closeDeleteAppModal();
+                    currentAppId = null;
+                    loadApps();
+                } else {
+                    alert("Error deleting app: " + (data.error || "Unknown"));
                 }
             } catch (e) {
                 alert("Server error: " + e.message);
