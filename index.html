@@ -457,6 +457,19 @@
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
+        // --- L'7IMAYA L'MSALA ---
+        // 1. Kan-choufo wach kayn l'password f localStorage
+        let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
+
+        // 2. Ila ma kaynch, kan-redirectiw DIRECT l login.html (9bel ma yt7el ay 7aja)
+        if (!ADMIN_PASSWORD) {
+            window.location.href = 'login.html';
+        }
+
+        // 3. Ila kan, kan-kemlo l'khedma 3adi
+        const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
+        let userToDeleteId = null;
+
         particlesJS("particles-js", {
             "particles": {
                 "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
@@ -474,15 +487,6 @@
             },
             "retina_detect": true
         });
-
-        // 7YEDT L' / MN L'AKHIR HNA 7TA HOWA
-         = "https://4flagkeys-production-8b1a.up.railway.app";
-        let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
-        let userToDeleteId = null;const API_URL
-
-        if (!ADMIN_PASSWORD) {
-            window.location.href = 'login.html';
-        }
 
         function logout() {
             localStorage.removeItem('adminPassword');
