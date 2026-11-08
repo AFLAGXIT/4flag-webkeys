@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4FLAG CHEAT | Login</title>
+    <title>ASXXHRAAF SENSI | Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -94,7 +94,7 @@
     <div id="particles-js"></div>
 
     <div class="login-box">
-        <h1><i class="fa-solid fa-shield-halved"></i> 4FLAG CHEAT</h1>
+        <h1><i class="fa-solid fa-shield-halved"></i> ASXXHRAAF SENSI</h1>
         <p>Please enter admin password to continue</p>
         <input type="password" id="adminLoginPass" class="login-input" placeholder="Enter Admin Password">
         <button class="login-btn" onclick="login()">Login</button>
@@ -120,8 +120,7 @@
             "retina_detect": true
         });
 
-        // 7YEDT L' / MN L'AKHIR
-        const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
+                       const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
 
         function login() {
             const pass = document.getElementById('adminLoginPass').value;
@@ -131,6 +130,7 @@
                 headers: { 'x-admin-password': pass }
             }).then(res => {
                 if (res.ok) {
+                    // HNA KAYT-SJJEL L'PASSWORD
                     localStorage.setItem('adminPassword', pass);
                     window.location.href = 'index.html';
                 } else {
