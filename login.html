@@ -131,7 +131,11 @@
             }).then(res => {
                 if (res.ok) {
                     // Kan-sjjlo f sessionStorage (kaytmse7 mli tsed browser)
-                    sessionStorage.setItem('adminPassword', pass);
+                    // BDEL HADI:
+// sessionStorage.setItem('adminPassword', pass);
+
+// B HADI:
+localStorage.setItem('adminPassword', pass);
                     window.location.href = 'index.html';
                 } else {
                     alert("Wrong Admin Password!");
