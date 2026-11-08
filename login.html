@@ -120,22 +120,18 @@
             "retina_detect": true
         });
 
-                const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
+        const API_URL = "https://4flagkeys-production-8b1a.up.railway.app";
 
         function login() {
             const pass = document.getElementById('adminLoginPass').value;
             if (!pass) return alert("Enter password!");
 
-            fetch(`${API_URL}/api/admin/users`, {
+            // Kan-3ayto L'API dyal L'APPS (li mawjouda f l'serveur w kat-verifi l'password)
+            fetch(`${API_URL}/api/admin/apps`, {
                 headers: { 'x-admin-password': pass }
             }).then(res => {
                 if (res.ok) {
-                    // Kan-sjjlo f sessionStorage (kaytmse7 mli tsed browser)
-                    // BDEL HADI:
-// sessionStorage.setItem('adminPassword', pass);
-
-// B HADI:
-localStorage.setItem('adminPassword', pass);
+                    localStorage.setItem('adminPassword', pass);
                     window.location.href = 'index.html';
                 } else {
                     alert("Wrong Admin Password!");
