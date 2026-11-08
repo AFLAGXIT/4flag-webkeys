@@ -66,46 +66,6 @@
         }
         .logo i { color: var(--accent); }
 
-        .app-selector {
-            background: var(--bg-hover);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            border: 1px solid var(--border);
-            position: relative;
-        }
-
-        .app-selector .app-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-top: 5px;
-            display: none;
-            z-index: 100;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .app-selector .app-dropdown.show { display: block; }
-        .app-selector .app-dropdown div {
-            padding: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.2s;
-            border-bottom: 1px solid var(--border);
-        }
-        .app-selector .app-dropdown div:hover {
-            background: var(--bg-hover);
-        }
-
         .nav-item {
             display: flex;
             align-items: center;
@@ -198,22 +158,6 @@
         .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: var(--accent-hover); }
         
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .filter-btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-        .filter-btn.active { background: var(--bg-hover); color: white; border-color: var(--text-muted); }
-
         .users-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -342,10 +286,6 @@
         .btn-cancel { background: var(--bg-hover); color: white; }
         .btn-cancel:hover { background: #3f3f46; }
 
-        #deleteModal .modal { width: 350px; text-align: center; }
-        #deleteModal .modal-actions { justify-content: center; }
-        #deleteModal .icon { font-size: 40px; color: var(--red); margin-bottom: 10px; }
-
         #toast {
             position: fixed;
             top: 20px;
@@ -395,16 +335,8 @@
                 <i class="fa-solid fa-shield-halved"></i> ASXXHRAAF 
             </div>
             
-            <!-- HNA L'APP SELECTOR -->
-            <div class="app-selector" onclick="toggleAppDropdown()">
-                <span id="currentAppName">Loading...</span>
-                <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
-                <div class="app-dropdown" id="appDropdown">
-                    <!-- L'apps ghadi ybanou hna -->
-                </div>
-            </div>
-            
-            <a class="nav-item active"><i class="fa-solid fa-users"></i> Users</a>
+            <!-- HNA L'NAVIGATION -->
+            <a class="nav-item" onclick="showAppsPage()" id="nav-apps"><i class="fa-solid fa-layer-group"></i> Applications</a>
             
             <div style="margin-top: auto;">
                 <a class="nav-item" href="https://discord.gg/YUGyTUcUgy" target="_blank" style="color: #5865F2;">
@@ -428,7 +360,19 @@
                 </div>
             </div>
 
-            <div class="dashboard">
+            <!-- L'PAGE DYAL L'APPS (KeyAuth Style) -->
+            <div class="dashboard" id="appsPage" style="display: block;">
+                <div class="header-actions">
+                    <h2>My Applications</h2>
+                    <button class="btn btn-primary" onclick="openCreateAppModal()" style="background: #5865F2;">
+                        <i class="fa-solid fa-plus"></i> Create Application
+                    </button>
+                </div>
+                <div class="users-grid" id="appsGrid"></div>
+            </div>
+
+            <!-- L'PAGE DYAL L'USERS -->
+            <div class="dashboard" id="usersPage" style="display: none;">
                 <div class="header-actions">
                     <h2>Users <span id="appHeaderName" style="font-size: 14px; color: var(--text-muted);"></span></h2>
                     <div style="display: flex; gap: 10px;">
@@ -440,15 +384,9 @@
                         </button>
                     </div>
                 </div>
-                
-                <div class="filters">
-                    <button class="filter-btn active"><i class="fa-solid fa-filter"></i></button>
-                    <button class="filter-btn"><i class="fa-solid fa-border-all"></i></button>
-                    <button class="filter-btn"><i class="fa-solid fa-user-plus"></i></button>
-                </div>
-
                 <div class="users-grid" id="usersGrid"></div>
             </div>
+
         </div>
     </div>
 
@@ -456,27 +394,22 @@
     <div class="modal-overlay" id="createUserModal">
         <div class="modal">
             <h3>Create user</h3>
-            
             <div class="form-group">
                 <label>Username <span style="color:red">*</span></label>
                 <input type="text" id="newUsername" placeholder="e.g. 4FLAG">
             </div>
-            
             <div class="form-group">
                 <label>Password <i class="fa-regular fa-circle-question"></i></label>
                 <input type="text" id="newPassword" placeholder="Enter password for panel">
             </div>
-
             <div class="form-group">
                 <label>Expiration <span style="color:red">*</span></label>
                 <input type="date" id="newExpiry">
             </div>
-
             <div class="checkbox-group">
                 <input type="checkbox" id="hwidLock" checked>
                 <label for="hwidLock">HWID Affected <i class="fa-regular fa-circle-question"></i></label>
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="createUser(event)">Create</button>
@@ -489,12 +422,10 @@
         <div class="modal">
             <h3>Create Application</h3>
             <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">Enter the application name. The system will generate OwnerID, Secret, and Version.</p>
-            
             <div class="form-group">
                 <label>Application Name <span style="color:red">*</span></label>
                 <input type="text" id="newAppName" placeholder="e.g. 4FLAG Application">
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="closeCreateAppModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="createApp(event)">Create App</button>
@@ -505,7 +436,7 @@
     <!-- MODAL DYAL DELETE -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal">
-            <i class="fa-solid fa-triangle-exclamation icon"></i>
+            <i class="fa-solid fa-triangle-exclamation icon" style="font-size: 40px; color: var(--red); margin-bottom: 10px;"></i>
             <h3>Are you sure?</h3>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px;">Do you really want to delete this user? This process cannot be undone.</p>
             <div class="modal-actions">
@@ -521,7 +452,12 @@
         let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
         let DISCORD_USER = localStorage.getItem('discord_user');
         let userToDeleteId = null;
+        
         let currentAppId = null;
+        let currentAppName = null;
+        let currentAppOwnerId = null;
+        let currentAppSecret = null;
+        let currentAppVersion = null;
 
         if (!ADMIN_PASSWORD && !DISCORD_USER) {
             window.location.href = 'login.html';
@@ -551,45 +487,60 @@
             window.location.href = 'login.html';
         }
 
-        function toggleAppDropdown() {
-            const dropdown = document.getElementById('appDropdown');
-            dropdown.classList.toggle('show');
+        function showAppsPage() {
+            document.getElementById('appsPage').style.display = 'block';
+            document.getElementById('usersPage').style.display = 'none';
+            document.getElementById('nav-apps').classList.add('active');
+            loadAppsGrid();
         }
 
-        async function loadApps() {
+        function showUsersPage(appId, appName) {
+            currentAppId = appId;
+            currentAppName = appName;
+            document.getElementById('appsPage').style.display = 'none';
+            document.getElementById('usersPage').style.display = 'block';
+            document.getElementById('appHeaderName').innerText = `(${appName})`;
+            loadUsers();
+        }
+
+        async function loadAppsGrid() {
             try {
                 const res = await fetch(`${API_URL}/api/admin/apps`, {
                     headers: { 'x-admin-password': ADMIN_PASSWORD || "APOSTADO99" }
                 });
                 const apps = await res.json();
                 
-                const dropdown = document.getElementById('appDropdown');
-                dropdown.innerHTML = "";
-                
+                const grid = document.getElementById('appsGrid');
+                grid.innerHTML = "";
+
                 if (apps.length === 0) {
-                    dropdown.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 15px;">No apps found</div>`;
-                    document.getElementById('currentAppName').innerText = "No Apps";
+                    grid.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 20px;">No applications found</div>`;
                     return;
                 }
 
                 apps.forEach(app => {
-                    dropdown.innerHTML += `<div onclick="selectApp(${app.id}, '${app.name}')">${app.name}</div>`;
+                    grid.innerHTML += `
+                        <div class="user-card" style="gap: 10px;">
+                            <div class="user-card-header">
+                                <div class="username" style="text-transform: uppercase;">${app.name}</div>
+                                <div class="status-badge">Active</div>
+                            </div>
+                            <div class="user-details" style="grid-template-columns: 1fr; gap: 8px;">
+                                <div class="detail-item">Owner ID: <span>${app.ownerid || 'N/A'}</span></div>
+                                <div class="detail-item">Secret: <span>${app.secret ? app.secret.substring(0, 15) + '...' : 'N/A'}</span></div>
+                                <div class="detail-item">Version: <span>${app.version || '1.0'}</span></div>
+                            </div>
+                            <div class="card-actions" style="border-top: none; padding-top: 0;">
+                                <button class="btn btn-primary" onclick="showUsersPage(${app.id}, '${app.name}')" style="width: 100%; background: #5865F2;">
+                                    <i class="fa-solid fa-users"></i> View Users
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 });
-
-                if (!currentAppId) {
-                    selectApp(apps[0].id, apps[0].name);
-                }
             } catch (e) {
-                console.error("Failed to load apps.");
+                console.error("Failed to load apps grid.");
             }
-        }
-
-        function selectApp(id, name) {
-            currentAppId = id;
-            document.getElementById('currentAppName').innerText = name;
-            document.getElementById('appHeaderName').innerText = `(${name})`;
-            document.getElementById('appDropdown').classList.remove('show');
-            loadUsers();
         }
 
         function openModal() {
@@ -643,7 +594,7 @@
                 if (data.success) {
                     showToast("App Created Successfully!", `OwnerID: <b>${data.ownerid}</b><br>Secret: <b>${data.secret}</b><br>Version: <b>${data.version}</b>`);
                     closeCreateAppModal();
-                    loadApps();
+                    loadAppsGrid();
                 } else {
                     alert("Server Error: " + JSON.stringify(data));
                 }
@@ -773,7 +724,7 @@
         }
 
         if (ADMIN_PASSWORD || DISCORD_USER) {
-            loadApps();
+            showAppsPage();
         }
 
         if (ADMIN_PASSWORD && !DISCORD_USER) {
