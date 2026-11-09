@@ -584,6 +584,19 @@
         </div>
     </div>
 
+    <!-- MODAL DYAL RESET HWID -->
+    <div class="modal-overlay" id="resetHwidModal">
+        <div class="modal">
+            <i class="fa-solid fa-rotate-right icon" style="font-size: 40px; color: var(--blue); margin-bottom: 10px;"></i>
+            <h3>Reset HWID?</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px;">Are you sure you want to reset the HWID for this user? This will allow them to login from a new PC.</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeResetHwidModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmResetHwid()" style="background: var(--blue);">Reset HWID</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DYAL DELETE APP -->
     <div class="modal-overlay" id="deleteAppModal">
         <div class="modal">
@@ -603,6 +616,7 @@
         let ADMIN_PASSWORD = localStorage.getItem('adminPassword');
         let DISCORD_USER = localStorage.getItem('discord_user');
         let userToDeleteId = null;
+        let userToResetHwidId = null;
         let currentAppId = null;
 
         if (!ADMIN_PASSWORD && !DISCORD_USER) {
@@ -711,7 +725,6 @@
             document.getElementById('createUserModal').style.display = 'flex';
             let tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            // Format for datetime-local: YYYY-MM-DDTHH:mm
             const iso = tomorrow.toISOString().slice(0, 16);
             document.getElementById('newExpiry').value = iso;
         }
@@ -736,6 +749,16 @@
 
         function closeDeleteAppModal() {
             document.getElementById('deleteAppModal').style.display = 'none';
+        }
+
+        function openResetHwidModal(id) {
+            userToResetHwidId = id;
+            document.getElementById('resetHwidModal').style.display = 'flex';
+        }
+
+        function closeResetHwidModal() {
+            userToResetHwidId = null;
+            document.getElementById('resetHwidModal').style.display = 'none';
         }
 
         function showToast(title, msg) {
@@ -813,7 +836,6 @@
             if (!username) return alert("Username is required!");
             if (!password) return alert("Password is required!");
 
-            // Bdel l'format dyal l'expiry mn "2026-11-10T15:30" l "2026-11-10 15:30:00"
             if (expiry) {
                 expiry = expiry.replace('T', ' ') + ":00";
             }
@@ -878,8 +900,8 @@
             }
         }
 
-        async function resetHWID(id) {
-            if (!confirm("Are you sure you want to reset the HWID for this user? This will allow them to login from a new PC.")) return;
+        async function confirmResetHwid() {
+            if (!userToResetHwidId) return;
 
             try {
                 const res = await fetch(`${API_URL}/api/admin/reset_hwid`, {
@@ -888,12 +910,13 @@
                         'Content-Type': 'application/json',
                         'x-admin-password': ADMIN_PASSWORD || "APOSTADO99"
                     },
-                    body: JSON.stringify({ id: id })
+                    body: JSON.stringify({ id: userToResetHwidId })
                 });
                 
                 const data = await res.json();
                 if (data.success) {
                     showToast("HWID Reset!", "The user can now login from a new PC.");
+                    closeResetHwidModal();
                     loadUsers();
                 } else {
                     alert("Error resetting HWID");
@@ -944,7 +967,7 @@
                                 <button class="btn-delete" onclick="openDeleteModal(${user.id})" style="flex:1;">
                                     <i class="fa-solid fa-trash"></i> Delete
                                 </button>
-                                <button class="btn-reset" onclick="resetHWID(${user.id})" style="flex:1;">
+                                <button class="btn-reset" onclick="openResetHwidModal(${user.id})" style="flex:1;">
                                     <i class="fa-solid fa-rotate-right"></i> Reset HWID
                                 </button>
                             </div>
