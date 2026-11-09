@@ -314,6 +314,21 @@
         }
         .btn-delete:hover { background: rgba(239, 68, 68, 0.1); }
 
+        .btn-reset {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--blue);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-reset:hover { background: rgba(59, 130, 246, 0.1); }
+
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.7);
@@ -527,7 +542,7 @@
             </div>
             <div class="form-group">
                 <label>Expiration <span style="color:red">*</span></label>
-                <input type="date" id="newExpiry">
+                <input type="datetime-local" id="newExpiry" style="color-scheme: dark;">
             </div>
             <div class="checkbox-group">
                 <input type="checkbox" id="hwidLock" checked>
@@ -696,7 +711,9 @@
             document.getElementById('createUserModal').style.display = 'flex';
             let tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('newExpiry').value = tomorrow.toISOString().split('T')[0];
+            // Format for datetime-local: YYYY-MM-DDTHH:mm
+            const iso = tomorrow.toISOString().slice(0, 16);
+            document.getElementById('newExpiry').value = iso;
         }
 
         function closeModal() {
@@ -790,11 +807,17 @@
 
             const username = document.getElementById('newUsername').value;
             const password = document.getElementById('newPassword').value;
-            const expiry = document.getElementById('newExpiry').value;
+            let expiry = document.getElementById('newExpiry').value;
             const hwidLock = document.getElementById('hwidLock').checked;
 
             if (!username) return alert("Username is required!");
             if (!password) return alert("Password is required!");
+
+            // Bdel l'format dyal l'expiry mn "2026-11-10T15:30" l "2026-11-10 15:30:00"
+            if (expiry) {
+                expiry = expiry.replace('T', ' ') + ":00";
+            }
+
             if (!currentAppId) return alert("No app selected!");
 
             try {
@@ -855,6 +878,31 @@
             }
         }
 
+        async function resetHWID(id) {
+            if (!confirm("Are you sure you want to reset the HWID for this user? This will allow them to login from a new PC.")) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/reset_hwid`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-admin-password': ADMIN_PASSWORD || "APOSTADO99"
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast("HWID Reset!", "The user can now login from a new PC.");
+                    loadUsers();
+                } else {
+                    alert("Error resetting HWID");
+                }
+            } catch (e) {
+                alert("Server error: " + e.message);
+            }
+        }
+
         async function loadUsers() {
             if (!currentAppId) return;
             try {
@@ -892,9 +940,12 @@
                                 <div class="detail-item">HWID Affected <span>${hwidStatus}</span></div>
                                 <div class="detail-item">Password <span>${user.password}</span></div>
                             </div>
-                            <div class="card-actions">
-                                <button class="btn-delete" onclick="openDeleteModal(${user.id})">
+                            <div class="card-actions" style="gap: 10px;">
+                                <button class="btn-delete" onclick="openDeleteModal(${user.id})" style="flex:1;">
                                     <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                                <button class="btn-reset" onclick="resetHWID(${user.id})" style="flex:1;">
+                                    <i class="fa-solid fa-rotate-right"></i> Reset HWID
                                 </button>
                             </div>
                         </div>
